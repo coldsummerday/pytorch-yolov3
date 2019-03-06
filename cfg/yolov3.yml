@@ -1,0 +1,71 @@
+output_root: "outputs"
+output_version: "baseline"
+backup_name: "weights"
+log_name: "logs"
+
+labels: ["fenda", "yingyangkuaixian", "jiaduobao", "maidong","TYCL", "BSS", "TYYC", "LLDS", "KSFH", "MZY"]
+anchors: "40.7032,63.3910, 41.6840,78.0961, 39.1573,93.8777, 54.3476,67.9443, 43.2690,119.4766, 63.8738,93.8851, 88.7958,151.4409, 133.9802,148.7441, 118.4132,218.9288"
+data_root_dir: "/data/zhb/data/voc_0221"
+sets:
+ - "VOC2007"
+
+MAX_BOXES: 90
+
+train:
+    dataset: "train"
+    stdout: False
+    gpus: "0"
+    nworkers: 16
+    pin_mem: True
+
+    momentum: 0.9
+    decay: 0.0005
+
+    clear: False
+
+    warmup_lr: 0.00005
+    lr_steps: [400,700,900,1000, 40000,45000]
+    lr_rates: [0.0001,0.0002,0.0005,0.001, 0.0001,0.00001]
+    max_batches: 50200
+    resize_interval: 10
+
+    backup_interval: 200
+    backup_steps: [1000]
+    backup_rates: [10000]
+
+    input_shape: [608, 608]
+    batch_size: 64
+    mini_batch_size: 8
+    max_boxes: 90
+    weights: "data/darknet53.conv.74"
+
+test:
+    dataset: "test"
+    stdout: True
+    gpus: "0"
+    nworkers: 8
+    pin_mem: True
+
+    input_shape: [416, 416]
+    batch_size: 8
+    weights: "/home/zhou/darknet/python/final.dw"
+
+    conf_thresh: 0.005
+    nms_thresh: 0.45
+
+    results: "results"
+
+speed:
+    gpus: "7"
+    batch_size: 1
+    max_iters: 200
+    input_shape: [544, 544]
+
+detect:
+    yolodevice: "cpu"
+    conf_thresh: 0.5
+    ignore_thresh: 0.4
+
+
+
+
