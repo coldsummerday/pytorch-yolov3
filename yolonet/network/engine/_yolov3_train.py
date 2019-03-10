@@ -1,7 +1,5 @@
 import logging as log
 import  torch
-import torch.optim as optim
-from  collections import  OrderedDict
 import os
 this_file_path = os.path.abspath(os.path.dirname(__file__))
 from ...data.dataset import VOCDetectionSet
@@ -29,8 +27,8 @@ class VOCTrianningEngine(object):
         self.lr_steps = config['lr_steps']
         self.lr_rates = config['lr_rates']
 
-        self.model = Yolov3_abc(config)
-        if torch.cuda.is_available():
+        self.model = Yolov3_abc(hyper_params.anchors,hyper_params.classes)
+        if torch.cuda.is_available() and hyper_params.cuda:
             self.model.cuda()
 
 
@@ -64,7 +62,8 @@ class VOCTrianningEngine(object):
         save_times = [i*config["backup_steps"][0] for i in range(10)]
         save_times.extend([i *config["backup_rates"][0]  for i in range(1,config["max_batches"]//config["backup_rates"][0])])
         self.trainer.register_plugin(ModelSaver(save_path=save_path,prefix=config["output_version"],suffix=".weights",times=save_times))
-        self.trainer.run(len(train_data_loader)//self.mini_batch_size+1)
+        epochs = int(hyper_params.max_batches/(len(train_data_loader)/self.mini_batch_size)+1)
+        self.trainer.run(epochs)
 
 
 class YoloTrainner(Trainer):
@@ -76,12 +75,14 @@ class YoloTrainner(Trainer):
             self.loss_fn_list.append(YoloLoss(self.model.num_classes,anchors=yolo_info.anchors,
                                               anchors_mask=yolo_info.anchors_mask,
                                               reduction=yolo_info.reduction,head_idx=idx))
+        self.batch_index = 0
                                             
     def train(self):
         for i, data in enumerate(self.dataset, self.iterations + 1):
             batch_input, batch_target = data
             #在每次获取batch data 后进行更新
-            self.call_plugins('batch', i//self.batch_scale, batch_input, batch_target)
+            if i % self.batch_scale==0:
+                self.call_plugins('batch', self.batch_index, batch_input, batch_target)
             input_var = batch_input
             target_var = batch_target
             if self.USE_CUDA:
@@ -104,9 +105,12 @@ class YoloTrainner(Trainer):
 
             self.optimizer.zero_grad()
             self.optimizer.step(closure)
-            self.call_plugins('iteration',  i//self.batch_scale, batch_input, batch_target,
+            if i % self.batch_scale == 0:
+                self.call_plugins('iteration', self.batch_index, batch_input, batch_target,
                               *plugin_data)
-            self.call_plugins('update',  i//self.batch_scale, self.model)
+            if i % self.batch_scale == 0:
+                self.call_plugins('update',  self.batch_index, self.model)
+                self.batch_index += 1
 
         self.iterations += i
 

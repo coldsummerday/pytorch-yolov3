@@ -4,8 +4,9 @@
 import  random
 from torch.utils.data import  Dataset
 import os
-from  .dataUtils import load_data_detection
+from  .dataUtils import load_data_detection,load_label
 from torchvision import  transforms
+from PIL import Image
 pil2tensor_transforms = transforms.Compose([
                             transforms.ToTensor(),
                         ])
@@ -14,7 +15,7 @@ __all__=["VOCDetectionSet"]
 
 class VOCDetectionSet(Dataset):
     def __init__(self,root,labels,data_set=["VOC2007"],transform=pil2tensor_transforms,jitter = 0.2,crop = False,
-                batch_size = 8,train=True,
+                batch_size = 8,train=True,list_file_name = "trainval",
                 hue=0.1, saturation=1.5, exposure=1.5):
         assert  type(labels)==list
         #data_set should be  ["VOC2007"] or ["VOC2007","VOC2012"]
@@ -32,10 +33,6 @@ class VOCDetectionSet(Dataset):
             _annotationsPath = os.path.join(self.root_dir,"VOCdevkit",dataset,'Annotations',"%s.xml")
             _imagePath = os.path.join(self.root_dir,"VOCdevkit", dataset, "JPEGImages", "%s.jpg")
             set_path = os.path.join(self.root_dir,"VOCdevkit",dataset,"ImageSets","Main","%s.txt")
-            if self.train:
-                list_file_name = "trainval"
-            else:
-                list_file_name = "test"
             with open(set_path % list_file_name) as file_handler:
                 lines = file_handler.readlines()
             self._image_files.extend([_imagePath %(x.rstrip()) for x in lines])
@@ -57,6 +54,7 @@ class VOCDetectionSet(Dataset):
         self.exposure = exposure
 
         self.transform = transform
+
 
     def get_random_size(self):
         if self.seen < 2000 * self.batch_size:
@@ -85,11 +83,21 @@ class VOCDetectionSet(Dataset):
                 self.shape = self.get_random_size()
             img, label = load_data_detection(imagePath,labelPath,self.classes,self.shape, self.crop, self.jitter, self.hue, self.saturation,
                                                  self.exposure)
+
+        else:
+            img = Image.open(imagePath).convert('RGB')
+            shape = list(img.size)
+            label = load_label(labelPath,self.classes)
+
+
         if self.transform is not None:
             img = self.transform(img)
-        self.seen += 1
 
-        return img,label
+        self.seen += 1
+        if not self.train:
+            return imagePath,shape,img,label
+        else:
+            return img,label
 
 
 

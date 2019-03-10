@@ -78,3 +78,31 @@ class Detection(Box):
             return 1
         elif self == other:
             return 0
+
+
+class DetectionResult(Box):
+    def __init__(self,detection_list,ori_size,labels):
+        #[x,y,w,h,conf,class_index]
+
+
+        self.center_x, self.center_y, self.width, self.height,self.confidence,self.class_label_index = detection_list
+        self.class_label = labels[self.class_label_index]
+        width,height = ori_size
+        self.center_x *= width
+        self.width *=width
+        self.center_y *= height
+        self.height *=height
+
+        self.center2coord()
+
+    def __repr__(self):
+        return "{}:center_x {},center_y {},width:{},height:{},confidence:{}\n".format(
+            self.class_label, self.center_x, self.center_y, self.width, self.height, self.confidence
+        )
+
+    def __str__(self):
+        return "{}:center_x {},center_y {},width:{},height:{},confidence:{}".format(
+            self.class_label,self.center_x,self.center_y,self.width,self.height,self.confidence
+        )
+
+

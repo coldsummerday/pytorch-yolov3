@@ -5,7 +5,11 @@ log_name: "logs"
 
 labels: ["fenda", "yingyangkuaixian", "jiaduobao", "maidong","TYCL", "BSS", "TYYC", "LLDS", "KSFH", "MZY"]
 anchors: "40.7032,63.3910, 41.6840,78.0961, 39.1573,93.8777, 54.3476,67.9443, 43.2690,119.4766, 63.8738,93.8851, 88.7958,151.4409, 133.9802,148.7441, 118.4132,218.9288"
-data_root_dir: "/data/zhb/data/voc_0221"
+anchors_mask:
+ - "6,9"
+ - "3,6"
+ - "0,3"
+data_root_dir: "/home/zhou/data/voc_0221"
 sets:
  - "VOC2007"
 
@@ -35,7 +39,7 @@ train:
 
     input_shape: [608, 608]
     batch_size: 64
-    mini_batch_size: 8
+    mini_batch_size: 4
     max_boxes: 90
     weights: "data/darknet53.conv.74"
 
@@ -48,10 +52,12 @@ test:
 
     input_shape: [416, 416]
     batch_size: 8
-    weights: "/home/zhou/darknet/python/final.dw"
+    weights: "data/baseline_5000.weights"
 
     conf_thresh: 0.005
     nms_thresh: 0.45
+    batch_size: 64
+    mini_batch_size: 8
 
     results: "results"
 

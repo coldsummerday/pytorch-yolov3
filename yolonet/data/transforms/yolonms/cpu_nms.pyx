@@ -39,7 +39,7 @@ def cpu_nms(np.ndarray[np.float32_t,ndim=2] dets,np.float  nms_thresh,int num_cl
 
     for class_index in range(num_classes):
         sort_order = prob[:,class_index].argsort()[::-1]
-        for i in range(num_classes):
+        for i in range(ndets):
             truth_i_index = sort_order[i]
             iarea = areas[truth_i_index]
             if prob[truth_i_index,class_index]==0:

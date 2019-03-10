@@ -11,7 +11,7 @@ else:
     import xml.etree.ElementTree as ET
 
 
-__all__=["load_data_detection"]
+__all__=["load_data_detection","load_label"]
 MAX_BOXES = 90
 
 def load_data_detection(imagePath,labelPath,class_list,shape,crop,jitter,hue,saturation,exposure):
@@ -37,11 +37,58 @@ def load_data_detection(imagePath,labelPath,class_list,shape,crop,jitter,hue,sat
     return img,label
 
 
+def load_label(labelPath,classes,keep_difficult=True):
 
-def fill_truth_detection(labelPath,classes,crop, flip, dx, dy, sx, sy,keep_difficult = True):
     max_boxes = MAX_BOXES
     label_map = np.zeros((max_boxes, 5))
 
+    target_root = ET.parse(labelPath).getroot()
+    size_root = target_root.find('size')
+    width = int(size_root.find('width').text)
+    height = int(size_root.find('height').text)
+
+    box_count = 0
+    for obj in target_root.iter('object'):
+        difficult = int(obj.find('difficult').text) == 1
+        if difficult and (not keep_difficult):
+            continue
+        name = obj[0].text.strip()
+        name_index = classes.index(name)
+        bbox = obj[4]
+
+        # bndbox = [int(bb.text)  for bb in bbox]
+        xmin = int(bbox.find('xmin').text) / width
+        x1 = min(0.999, max(0, xmin))
+        xmax = int(bbox.find('xmax').text) / width
+        x2 = min(0.999, max(0, xmax ))
+        ymin = int(bbox.find('ymin').text) / height
+        y1 = min(0.999, max(0, ymin))
+        ymax = int(bbox.find('ymax').text) / height
+        y2 = min(0.999, max(0, ymax))
+
+        x = (x1 + x2) / 2  # center x
+        y = (y1 + y2) / 2  # center y
+        w = (x2 - x1)  # width
+        h = (y2 - y1)  # height
+
+        # when crop is applied, we should check the cropped width/height ratio
+        if w < 0.0001 or h < 0.0001:
+            continue
+        label_map[box_count][0] = x
+        label_map[box_count][1] = y
+        label_map[box_count][2] = w
+        label_map[box_count][3] = h
+        label_map[box_count][4] = name_index
+        box_count += 1
+    return label_map
+
+
+
+
+def fill_truth_detection(labelPath,classes,crop, flip, dx, dy, sx, sy,keep_difficult = True):
+
+    max_boxes = MAX_BOXES
+    label_map = np.zeros((max_boxes, 5))
     target_root = ET.parse(labelPath).getroot()
     size_root = target_root.find('size')
     width = int(size_root.find('width').text)

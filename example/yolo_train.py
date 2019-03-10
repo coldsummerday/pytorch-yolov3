@@ -10,7 +10,7 @@ logging.basicConfig(
          level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-from yolonet.network.engine._yolov3_train import  VOCTrianningEngine
+from yolonet.network.engine import  VOCTrianningEngine
 
 
 def main():

@@ -1,0 +1,7 @@
+Cython==0.28.5
+torchvision==0.2.1
+numpy==1.13.3
+lxml==4.2.1
+pytorch==1.0.0
+Pillow==5.4.1
+PyYAML==3.13

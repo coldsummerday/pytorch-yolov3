@@ -1,13 +1,11 @@
 import os
 import logging as log
-import torch
 import torch.nn as nn
 from ._darknet_load import DarknetLoader
 from ..layers import _darknet_layer as net_layer
 from .utils import parse_cfg
-
 this_file_path  = os.path.abspath(os.path.dirname(__file__))
-from ...hyperparams import HyperParams
+
 
 
 
@@ -17,13 +15,13 @@ class Yolov3_abc(DarknetLoader):
     本yolo 抽象类完成 网络骨干的搭建
     需要知道 识别的种类,所以需要env
     """
-    def __init__(self,cfg_dict):
+    def __init__(self,anchors,num_classes=10):
         """ Network initialisation """
         super().__init__()
         # Parameters
 
-        self.hyperparams = HyperParams(config=cfg_dict)
-        self.num_classes = self.hyperparams.classes
+        self.anchors = anchors
+        self.num_classes = num_classes
 
         self.yolo_infos = []
 
@@ -132,7 +130,7 @@ class Yolov3_abc(DarknetLoader):
                 mask = tuple([int(x) for x in mask])
 
                 yolo_scale =int(x["scale"])
-                yolo_info_layer = net_layer.YoloLayerInfo(self.hyperparams.anchors,mask,reduction=yolo_scale)
+                yolo_info_layer = net_layer.YoloLayerInfo(self.anchors,mask,reduction=yolo_scale)
                 self.yolo_infos.append(yolo_info_layer)
                 module.add_module("yolo_{}".format(index), net_layer.EmptyLayer())
             else:
