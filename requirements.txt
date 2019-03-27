@@ -1,7 +1,8 @@
-Cython==0.28.5
-torchvision==0.2.1
 numpy==1.13.3
+torch==1.0.0
+opencv_python==3.4.2.17
 lxml==4.2.1
-pytorch==1.0.0
+torchvision==0.2.1
+Cython==0.28.5
 Pillow==5.4.1
-PyYAML==3.13
+PyYAML==5.1

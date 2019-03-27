@@ -41,7 +41,7 @@ def load_voc_annotation_w_h(modelname):
     data_root_dir = config['data_root_dir']
     annotation_files = []
     for dataSet in config['sets']:
-        annotation_path = os.path.join(data_root_dir,'VOC'+str(dataSet)+"/Annotations/")
+        annotation_path = os.path.join(data_root_dir,str(dataSet)+"/Annotations/")
         annotations = os.listdir(annotation_path)
         annotations = [os.path.join(annotation_path,filename) for filename in annotations]
         annotation_files.extend(annotations)

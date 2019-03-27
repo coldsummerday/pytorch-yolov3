@@ -1,6 +1,4 @@
 import logging
-import time
-#from PIL import Image
 import sys
 sys.path.insert(0, '.')
 
@@ -11,16 +9,24 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 from yolonet.network.engine import  YoloV3DetectEngine
+import  argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Yolo v3 for pytorch')
+    parser.add_argument('model_name', help='model name', type=str, default="Yolov3")
+    parser.add_argument("image",help="detect image name")
+    args = parser.parse_args()
+    return args
+
 
 
 def main():
-    config = initEnv(2, "Yolov3")
+    arg = parse_args()
+    config = initEnv(2, arg.model_name)
     eng=YoloV3DetectEngine(config)
-    #results, img = eng.detectionOneImage("data/ten_18596.jpg")
+    results, img = eng.detectionOneImage(arg.image)
 
-    #img.show()
-    img_b = eng.evaluation()
-    #img_a.save("1.jpg")
-    #img_b.save("2.jpg")
+    img.show()
+
 if __name__ == '__main__':
     main()

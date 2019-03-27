@@ -199,7 +199,7 @@ def voc_eval(labels, dets, ovthresh=0.8,inf_min=0.00001,use_07_metric=False):
         max_iou_index = np.argmax(ious)
 
         if iou_max > ovthresh:
-
+            #label 要正确
             if not label_mask[max_iou_index]:
                 tp[idx] = 1
                 #第max_iou_index个物体有人了
