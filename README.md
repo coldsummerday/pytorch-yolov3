@@ -106,6 +106,7 @@ the output will be the follow:
 #to do:
 
 [1] eval
-[2] more backbone for yolo v3
+[2]Distributed training
+[3] more backbone for yolo v3
 
  
